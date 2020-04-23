@@ -5,9 +5,18 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
@@ -18,6 +27,28 @@ public class App implements RequestHandler<Object, Object> {
 
     public Object handleRequest(final Object input, final Context context) {
 System.out.println("!!!!@@@@");
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
+
+        try {
+            DynamoDBMapper mapper = new DynamoDBMapper(client);
+            Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+            eav.put(":val1", new AttributeValue().withN("1024911562"));
+
+            DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+                    .withFilterExpression("productId = :val1").withExpressionAttributeValues(eav);
+
+            List<Product> scanResult = mapper.scan(Product.class, scanExpression);
+
+            for (Product product : scanResult) {
+                System.out.println("productId:" + product.getProductId()+", brandId:"+product.getBrandId());
+            }
+
+        }
+        catch (Exception e) {
+            System.err.println("Unable to read item");
+            System.err.println(e.getMessage());
+        }
+
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("X-Custom-Header", "application/json");
@@ -35,5 +66,31 @@ System.out.println("!!!!@@@@");
         try(BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
             return br.lines().collect(Collectors.joining(System.lineSeparator()));
         }
+    }
+
+    @DynamoDBTable(tableName = "Product")
+    public static class Product {
+
+        private int productId;
+        private int brandId;
+
+        @DynamoDBHashKey(attributeName = "productId")
+        public int getProductId() {
+            return productId;
+        }
+
+        public void setProductId(int productId) {
+            this.productId = productId;
+        }
+
+        @DynamoDBAttribute(attributeName = "brandId")
+        public int getBrandId() {
+            return brandId;
+        }
+
+        public void setBrandId(int brandId) {
+            this.brandId = brandId;
+        }
+
     }
 }
