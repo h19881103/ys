@@ -29,7 +29,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 public class App implements RequestHandler<Object, Object> {
 
     public Object handleRequest(final Object input, final Context context) {
-System.out.println("!!!!@@@@");
+System.out.println("!!!!@@@@aaaaaaaaaaaaa123");
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
 
         try {
