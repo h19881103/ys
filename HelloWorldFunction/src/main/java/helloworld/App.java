@@ -19,6 +19,9 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 
 /**
  * Handler for requests to Lambda function.
@@ -28,6 +31,19 @@ public class App implements RequestHandler<Object, Object> {
     public Object handleRequest(final Object input, final Context context) {
 System.out.println("!!!!@@@@");
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
+
+        try {
+            RestHighLevelClient esClient = new RestHighLevelClient(
+                    RestClient.builder(
+                            new HttpHost("localhost", 9200, "http")));
+
+            System.out.println("!!!@@esclient="+esClient);
+
+            esClient.close();
+        }
+        catch (Exception e) {
+            System.out.println("!!!@@Exception="+e.getMessage());
+        }
 
         try {
             DynamoDBMapper mapper = new DynamoDBMapper(client);
