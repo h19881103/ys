@@ -34,7 +34,7 @@ System.out.println("!!!!@@@@aaaaaaaaaaaaa123");
         try {
             RestHighLevelClient esClient = new RestHighLevelClient(
                     RestClient.builder(
-                            new HttpHost("localhost", 9200, "http")));
+                            new HttpHost("172.17.14.8", 9200, "http")));
 
             System.out.println("!!!@@@esClient="+esClient);
             for (Node node : esClient.getLowLevelClient().getNodes()) {
