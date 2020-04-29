@@ -20,6 +20,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import org.apache.http.HttpHost;
+import org.elasticsearch.client.Node;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 
@@ -30,14 +31,15 @@ public class App implements RequestHandler<Object, Object> {
 
     public Object handleRequest(final Object input, final Context context) {
 System.out.println("!!!!@@@@aaaaaaaaaaaaa123");
-        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
-
         try {
             RestHighLevelClient esClient = new RestHighLevelClient(
                     RestClient.builder(
                             new HttpHost("localhost", 9200, "http")));
 
-            System.out.println("!!!@@esclient="+esClient);
+            System.out.println("!!!@@@esClient="+esClient);
+            for (Node node : esClient.getLowLevelClient().getNodes()) {
+                System.out.println("!!!@@esclient, node.getHost()=="+node.getHost()+", node.getName()="+node.getName());
+            }
 
             esClient.close();
         }
@@ -45,6 +47,7 @@ System.out.println("!!!!@@@@aaaaaaaaaaaaa123");
             System.out.println("!!!@@Exception="+e.getMessage());
         }
 
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
         try {
             DynamoDBMapper mapper = new DynamoDBMapper(client);
             Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
